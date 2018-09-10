@@ -52,6 +52,39 @@ class Users(object):
         return make_response(jsonify({"status":"created", "user":user}),201)
 
 
+
+    @app.route("/login")
+    def home():
+        if not session.get('logged_in'):
+            return make_response(jsonify({"status":"login error", "login":False}),401)
+        else:
+            return make_response(jsonify({"status":"logged in", "login":True}, ),200)
+     
+    @app.route("/login", methods=["POST"])
+    def do_user_login():
+        data = request.get_json()
+        username = data['username']
+        password = data['password']
+
+        for user in users:
+            u = user.get('username')
+            p = user.get('password')
+
+            if password == p and username == u:
+                session['logged_in'] = True
+            else:
+                session['logged_in'] = False
+            
+        return Users.home()
+
+
+
+    @app.route("/logout")
+    def logout():
+        session['logged_in'] = False
+        return Users.home()
+
+
 if __name__ == "__main__":
     app.secret_key = os.urandom(12)
     app.run(debug=True)
