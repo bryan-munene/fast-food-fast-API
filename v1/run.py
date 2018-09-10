@@ -11,6 +11,16 @@ def index():
     return ("WELCOME. You are here.")
 
 
+#USER SECTION
+users = []
+
+class Users(object):
+    @app.route('/register', methods=['POST'])
+    def register(self):
+        if not request.is_json:
+            return (400,"request not json")
+        else:
+            pass
 
 if __name__ == '__main__':
     app.run()
