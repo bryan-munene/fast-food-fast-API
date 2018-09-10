@@ -6,21 +6,52 @@ import os
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route("/")
 def index():
-    return ("WELCOME. You are here.")
+    return "WELCOME. You are here."
 
 
 #USER SECTION
 users = []
 
 class Users(object):
-    @app.route('/register', methods=['POST'])
-    def register(self):
+    @app.route("/register", methods=["POST"])
+    def register():
         if not request.is_json:
-            return (400,"request not json")
+            return jsonify(400,"request not json")
         else:
-            pass
+            data = request.get_json() 
+            user_id =  len(users)+1
+            name = data['name']
+            email = data['email']
+            username = data['username']
+            password = data['password']
+            password2 = data['password2']
 
-if __name__ == '__main__':
-    app.run()
+        
+        if not password == password2:
+            return jsonify(403,"passwords don't match")
+
+        if not len(users) == 0:
+            for user in users:
+                if email == user.get('email'):
+                    return jsonify(403,"user already exists")
+
+        else:
+            user = {
+                 "user_id":user_id,
+                 "name":name,
+                 "email":email,   
+                 "username":username,
+                 "password":password,
+                 "admin":False
+                 }
+
+            users.append(user)
+
+        return make_response(jsonify({"status":"created", "user":user}),201)
+
+
+if __name__ == "__main__":
+    app.secret_key = os.urandom(12)
+    app.run(debug=True)
