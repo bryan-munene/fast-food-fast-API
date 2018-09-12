@@ -119,6 +119,66 @@ class Users(object):
 
 
 
+#FOOD SECTION
+foods = []
+
+class Foods(object):
+    @app.route("/add_food", methods=["POST"])
+    def add_food():
+        if not session.get('logged_in'):
+            return jsonify(400,"User must be logged in")
+
+
+        if not request.is_json:
+            return jsonify(400,"request not json")
+        else:
+            data = request.get_json() 
+            food_id =  len(foods)+1
+            name = data['name']
+            price = data['price']
+            image = data['image']
+            createdby = session['user_id']
+
+        
+        
+
+        if len(foods) > 0:
+            for food in foods:
+                n = food.get('name')
+                p = food.get('price')
+                
+                
+        else:
+            food = {
+                 "food_id":food_id,
+                 "name":name,
+                 "price":price,   
+                 "image":image,
+                 "createdby":createdby
+                 }
+
+            foods.append(food)
+
+            return make_response(jsonify({"status":"created", "food":food, "foods":foods }),201)
+                
+                
+        if name == n and price == p:
+            return jsonify(403,"food item already exists")
+                    
+        else:
+            food = {
+                 "food_id":food_id,
+                 "name":name,
+                 "price":price,   
+                 "image":image,
+                 "createdby":createdby
+                 }
+
+            foods.append(food)
+
+            return make_response(jsonify({"status":"created", "food":food, "foods":foods }),201)
+
+
 
 if __name__ == "__main__":
     app.secret_key = os.urandom(12)
