@@ -1,5 +1,6 @@
 from app import app
 from flask import Flask, flash, redirect, render_template, request, session, jsonify, make_response
+from werkzeug.security import generate_password_hash, check_password_hash
 import os
 
 
@@ -32,11 +33,13 @@ class Users(object):
         if not password == password2:
             return jsonify(403,"passwords don't match")
 
-        if not len(users) == 0:
+        
+        if len(users) > 0:
             for user in users:
-                if email == user.get('email'):
-                    return jsonify(403,"user already exists")
-
+                e = user.get('email')
+                u = user.get('username')
+                p = user.get('password')
+                
         else:
             user = {
                  "user_id":user_id,
@@ -49,16 +52,39 @@ class Users(object):
 
             users.append(user)
 
-        return make_response(jsonify({"status":"created", "user":user}),201)
+            return make_response(jsonify({"status":"created", "user":user, "users":users }),201)
+                
+                
+        if email == e:
+            return jsonify(403,"user already exists")
+                    
+        elif username == u and password == p:
+            return jsonify(403,"user already exists")
+                    
+        else:
+            user = {
+                 "user_id":user_id,
+                 "name":name,
+                 "email":email,   
+                 "username":username,
+                 "password":password,
+                 "admin":False
+                 }
+
+            users.append(user)
+
+            return make_response(jsonify({"status":"created", "user":user, "users":users }),201)
 
 
 
     @app.route("/login")
     def home():
-        if not session.get('logged_in'):
-            return make_response(jsonify({"status":"login error", "login":False}),401)
+        if session.get('logged_in'):
+            return make_response(jsonify({"status":"user logged in", "id":session['user_id'], "login":True}, ),200)
+        elif session.get('logged_in_admin'):
+            return make_response(jsonify({"status":"admin logged in", "login":True}, ),200)
         else:
-            return make_response(jsonify({"status":"logged in", "login":True}, ),200)
+            return make_response(jsonify({"status":"login error", "login":False}),401)
      
     @app.route("/login", methods=["POST"])
     def do_user_login():
@@ -69,13 +95,20 @@ class Users(object):
         for user in users:
             u = user.get('username')
             p = user.get('password')
+            r = user.get('admin')
 
-            if password == p and username == u:
+            if password == p and username == u and r == False:
+                session['user_id'] = user['user_id']
                 session['logged_in'] = True
+            elif password == p and username == u and r == True:
+                session['logged_in_admin'] = True
             else:
                 session['logged_in'] = False
+                session['logged_in_admin'] = False
             
         return Users.home()
+
+    
 
 
 
@@ -83,6 +116,8 @@ class Users(object):
     def logout():
         session['logged_in'] = False
         return Users.home()
+
+
 
 
 if __name__ == "__main__":
