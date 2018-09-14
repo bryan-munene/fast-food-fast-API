@@ -284,7 +284,7 @@ class Orders(object):
 
 
     @app.route('/orders/<int:order_id>', methods=['PUT'])
-    def updateorders(orderID):
+    def updateorders(order_id):
         if not session.get('logged_in'):
             return jsonify(400,"User must be logged in")
         
@@ -293,8 +293,8 @@ class Orders(object):
             if len(orders) != 0:
                 order = [order for order in orders if order.get('order_id')==order_id]
             
-                order.get('completed_status') = data['completed_status']
-                order.get('accepted_status') = data['accepted_status']
+                order['completed_status'] = data['completed_status']
+                order['accepted_status'] = data['accepted_status']
                 
                 return make_response(jsonify({"status":"ok", "order":order}),200)
 
