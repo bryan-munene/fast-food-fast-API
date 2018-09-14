@@ -256,4 +256,10 @@ class Orders(object):
             return make_response(jsonify({"status":"created", "orders":orders, "order_items":order_items, "order":order, "order_item":order_item,}),201)
 
     
-    
+    @app.route("/orders", methods=["GET"])
+    def ordersall():
+        if not session.get('logged_in'):
+            return jsonify(400,"User must be logged in")
+        else:
+            return make_response(jsonify({"status":"ok", "orders":orders}),200)
+        
