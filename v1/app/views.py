@@ -266,7 +266,7 @@ class Orders(object):
 
 
 
-     @app.route('/orders/<int:order_id>', methods=['GET'])
+    @app.route('/orders/<int:order_id>', methods=['GET'])
     def specificorder(order_id):
         if not session.get('logged_in'):
             return jsonify(400,"User must be logged in")
@@ -280,3 +280,27 @@ class Orders(object):
 
         else:
             return make_response(jsonify({"status":"ok", "order":order}),200)
+
+
+
+    @app.route('/orders/<int:order_id>', methods=['PUT'])
+    def updateorders(orderID):
+        if not session.get('logged_in'):
+            return jsonify(400,"User must be logged in")
+        
+        if request.method == 'PUT':
+            data = request.get_json(force=True)
+            if len(orders) != 0:
+                order = [order for order in orders if order.get('order_id')==order_id]
+            
+                order.get('completed_status') = data['completed_status']
+                order.get('accepted_status') = data['accepted_status']
+                
+                return make_response(jsonify({"status":"ok", "order":order}),200)
+
+            else:
+                return make_response(jsonify({'error': 'the order does not exist'}), 404)
+
+        else:
+            return Orders.specificorder(order_id)
+            
